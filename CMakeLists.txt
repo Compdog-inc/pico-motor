@@ -7,10 +7,12 @@ project(pico-motor C CXX ASM)
 set(CMAKE_C_STANDARD 17)
 set(CMAKE_CXX_STANDARD 20)
 
-set(USED_STATE_MACHINES 0,1,2,3,5,6) #4 does not work for some reason
-
 if (PICO_SDK_VERSION_STRING VERSION_LESS "2.0.0")
-    message(FATAL_ERROR "Raspberry Pi Pico SDK version 2.0.0 (or later) required. Your version is ${PICO_SDK_VERSION_STRING}")
+        message(FATAL_ERROR "Raspberry Pi Pico SDK version 2.0.0 (or later) required. Your version is ${PICO_SDK_VERSION_STRING}")
+endif()
+
+if(NOT PICO_MOTOR_USED_STATE_MACHINES)
+        set(PICO_MOTOR_USED_STATE_MACHINES 0,1,2,3,5,6) #4 does not work for some reason
 endif()
 
 # Initialize the SDK
