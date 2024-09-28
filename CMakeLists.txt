@@ -22,8 +22,8 @@ add_compile_options(-Wall
         -Wno-maybe-uninitialized
         )
 
-configure_file( config.h.in ${CMAKE_BINARY_DIR}/generated/config.h )
-include_directories( ${CMAKE_BINARY_DIR}/generated/ ) 
+configure_file( config.h.in ${CMAKE_BINARY_DIR}/generated/pico-motor/config.h )
+include_directories( ${CMAKE_BINARY_DIR}/generated/pico-motor/ ) 
 
 add_library(pico-motor STATIC
         src/motor.cpp
