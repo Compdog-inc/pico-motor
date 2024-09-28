@@ -1,0 +1,6 @@
+#ifndef CONFIG_H_IN
+#define CONFIG_H_IN
+
+#define USED_STATE_MACHINES @USED_STATE_MACHINES@
+
+#endif

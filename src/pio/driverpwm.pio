@@ -1,0 +1,58 @@
+;
+; Copyright (c) 2020 Raspberry Pi (Trading) Ltd.
+;
+; SPDX-License-Identifier: BSD-3-Clause
+;
+
+; Side-set pins 0,1 are used for PWM output (determined by first bit in OSR config)
+
+.program driverpwm
+.side_set 2 opt
+
+entry:
+    pull noblock        side 0b00 ; Pull from FIFO to OSR if available, else copy X to OSR.
+    mov x, osr             ; Copy most-recently-pulled value back to scratch X
+    out y, 1               ; Copy pin one/two bit from OSR into Y
+    jmp !y init_one        ; Run pin one if pin one/two bit is false
+
+init_two:
+    mov y, osr             ; Copy shifted OSR to temp Y
+    mov osr, x             ; Restore OSR to original value stored in X
+    mov x, y               ; Copy shifted OSR value in Y to X
+    mov y, isr             ; ISR contains PWM period. Y used as counter.
+countloop_two:
+    jmp x!=y noset_two     ; Set pin high if X == Y, keep the two paths length matched
+    jmp skip_two        side 0b10
+noset_two:
+    nop                    ; Single dummy cycle to keep the two paths the same length
+skip_two:
+    jmp y-- countloop_two  ; Loop until Y hits 0, then pull a fresh PWM value from FIFO
+    mov x, osr             ; Put original OSR value to X store
+    jmp entry              ; Prevent pin one from running
+
+init_one:
+    mov y, osr             ; Copy shifted OSR to temp Y
+    mov osr, x             ; Restore OSR to original value stored in X
+    mov x, y               ; Copy shifted OSR value in Y to X
+    mov y, isr             ; ISR contains PWM period. Y used as counter.
+countloop_one:
+    jmp x!=y noset_one     ; Set pin high if X == Y, keep the two paths length matched
+    jmp skip_one        side 0b01
+noset_one:
+    nop                     ; Single dummy cycle to keep the two paths the same length
+skip_one:
+    jmp y-- countloop_one   ; Loop until Y hits 0, then pull a fresh PWM value from FIFO
+    mov x, osr              ; Put original OSR value to X store
+    nop                     ; Match branch length
+
+% c-sdk {
+static inline void driverpwm_program_init(PIO pio, uint sm, uint offset, uint pin) {
+   pio_gpio_init(pio, pin);
+   pio_gpio_init(pio, pin+1);
+   pio_sm_set_consecutive_pindirs(pio, sm, pin, 2, true);
+   pio_sm_config c = driverpwm_program_get_default_config(offset);
+   sm_config_set_sideset_pins(&c, pin);
+   sm_config_set_out_shift(&c, true, false, 32);
+   pio_sm_init(pio, sm, offset, &c);
+}
+%}
