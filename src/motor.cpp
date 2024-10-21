@@ -55,6 +55,7 @@ Motor::Motor(uint cw, uint ccw) : currentSpeed(0)
     driverpwm_program_init(pio, sm, pio == pio0 ? pio0Offset : pio1Offset, base);
     pio_driverpwm_set_config(pio, sm, MOTOR_PWM_PERIOD);
     pio_sm_set_clkdiv(pio, sm, 20.f);
+    set(0);
 }
 
 Motor::~Motor()
