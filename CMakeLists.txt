@@ -43,4 +43,5 @@ target_include_directories(pico-motor PRIVATE
 target_link_libraries(pico-motor
         pico_stdlib
         hardware_pio
+        hardware_clocks
         )
