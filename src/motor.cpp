@@ -101,7 +101,7 @@ void Motor::set(float speed)
     assert(speed <= 1);
 
     currentSpeed = speed;
-    speed *= (speed > 0 ? 1 : -1) * speed;                        // Squared PWM response curve, with sign
+
     uint16_t level = (uint16_t)floorf(fabsf(speed) * resolution); // pio program uses raw counter values, scale by speed
     if (speed >= 0)
     {
@@ -138,6 +138,7 @@ void Motor::setResolution(uint32_t resolution)
     this->resolution = resolution;
     pio_driverpwm_set_config(pio, sm, resolution);
     pio_sm_set_clkdiv(pio, sm, get_clkdiv_from_hz(frequency, resolution));
+    set(currentSpeed); // update set_level with new resolution
 }
 
 uint32_t Motor::getResolution() const
